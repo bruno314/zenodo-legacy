@@ -25,11 +25,28 @@
 """Zenodo legacy compatibility layer."""
 
 from __future__ import absolute_import, print_function
+import urllib
 
-from flask import Blueprint
+from flask import Blueprint, request, redirect
 
 blueprint = Blueprint(
     'zenodo_legacy',
     __name__,
     url_prefix=''
 )
+
+
+@blueprint.route('/search', methods=['GET'])
+def redirect_old_search():
+    modified_query_string = dict(request.args)
+
+    # Modifications
+    if 'p' in modified_query_string.keys():
+        modified_query_string['q'] = modified_query_string.get('p', '')
+        del modified_query_string['p']
+
+    return redirect("/newsearch?" + urllib.urlencode(modified_query_string,
+                                                     doseq=True))
+
+
+#@blueprint.route('/collection',methods=['GET'])
